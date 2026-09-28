@@ -178,6 +178,34 @@ bookkeeper would.
    the owner, 2026-09-12)`. Rule 4 still stands: a bank line already in
    the ledger's currency needs no rate at all.
 
+## 12. Draft-only and read-only connections
+
+1. The human chooses how much each connection may do when they make its
+   token or connect it: full access, draft-only or read-only. The server
+   lists only the tools your connection may call, and its connect-time
+   instructions say so when yours is draft-only or read-only.
+2. A draft-only connection reads everything, stages drafts with
+   `stage_drafts`, and updates or discards only the drafts it staged
+   itself. It never posts, approves, corrects, issues, voids, files,
+   configures, invites, syncs or dismisses inbox items.
+3. When your drafts are ready, call `request_approval` with the ledger.
+   Qunei emails the human a link to that ledger's drafts page, where they
+   sign in and approve or discard each draft. Tell the human you have
+   asked. Never paste an approval link or ask them to approve in the
+   chat: approval happens on Qunei's page, outside this conversation.
+4. `request_approval` emails at most once an hour per connection and
+   ledger. A request inside the hour succeeds with `emailed: false` and
+   says when the last email went; the page already lists every waiting
+   draft, so do not ask again to hurry the human.
+5. `token.scope-denied` means your connection's level does not allow the
+   call. It is the rule working, not an error to retry or route around:
+   stage a draft instead, or tell the human the task needs a full-access
+   connection, which they choose when they make a token or connect an
+   assistant. A draft you did not stage is not yours to change; stage a
+   corrected one and let the human discard the other.
+6. A read-only connection answers questions from the query tools and
+   changes nothing.
+
 See qunei-conventions for how learned rules get recorded and consulted,
 qunei-onboard for setting up a new entity from scratch, and qunei-nz-gst
 for the GST-registered net-split convention and the return it feeds.

@@ -39,6 +39,16 @@ then execute it exactly as confirmed.
    exception). In a workspace that already has ledgers, brief first;
    the briefing's `billing` section (§10) tells you where the
    workspace stands.
+4. Every connection has the access level the human chose when they made
+   its token or connected it: **full access** (read and change the
+   books), **draft-only** (read, and prepare drafts for the human to
+   approve on Qunei's drafts page) or **read-only** (read only).
+   Setting up a ledger needs full access. If `init_entity` or another
+   setup call is refused with `token.scope-denied`, say so plainly and
+   ask the human to connect you again with full access: a new token
+   chosen as Full access on the workspace page or /app/connect, or Full
+   access on the consent screen when they sign you in. Continue once
+   they have.
 
 ## 2. Interview first — no tools yet
 
