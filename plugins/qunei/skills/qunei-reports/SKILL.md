@@ -1,6 +1,6 @@
 ---
 name: qunei-reports
-description: Use when asked to present, report, or visualize a Qunei entity's financial statements — in-chat tables, a CSV, an HTML dashboard, or a rendered, brand-styled report document — including restyling the report template or setting the ledger's brand kit (logo, colours, fonts).
+description: Use when asked to present, report, or visualize a Qunei entity's financial statements — in-chat tables, a CSV, a live dashboard or artifact of the figures the human watches, or a rendered, brand-styled report document to print or send — including restyling the report template or setting the ledger's brand kit (logo, colours, fonts).
 ---
 
 # Qunei Reports
@@ -16,11 +16,11 @@ it renders what the query tools return, this session, every time.
    `account_ledger`, or `find_entries` called in the current session —
    never from memory, never from a number you or the human mentioned
    earlier in this conversation or a prior one. One scoped exception:
-   the HTML dashboard's `{{PENDING_DRAFTS}}` block (§11.3) is built from
-   `list_drafts` (or `get_briefing`'s `work_state.pending_drafts`) —
-   none of the query tools above report on unposted drafts, so this
-   block is the one place in a report that draws from somewhere else,
-   still queried live, this session.
+   a dashboard (§12) may also show what none of those tools report,
+   each figure from the one tool that does, still queried live, this
+   session: drafts waiting for approval from `list_drafts` (or
+   `get_briefing`'s `work_state.pending_drafts`), and a period's GST
+   from `gst_return`.
 2. Re-query even if you produced a very similar report minutes ago in
    the same session. The books may have changed; a cached figure is a
    wrong figure waiting to happen.
@@ -360,7 +360,7 @@ it renders what the query tools return, this session, every time.
    pair reads `"default"` with a null version until the ledger has
    written one of its own.
 3. Deliver it as written. Save the `html` to a file next to the books,
-   or publish it as an Artifact when the client supports one (§11.4).
+   or publish it as an Artifact when the client supports one (§11.3).
    PDF is the browser's own print dialogue — Print, then Save as PDF:
    the shipped chrome carries `@page` and page-break rules for exactly
    that, and there is no PDF tool on this server.
@@ -637,39 +637,91 @@ it renders what the query tools return, this session, every time.
    dialogue away.
 2. **CSV**: write the file directly — a CSV is just the query result
    restated as comma-separated rows, no client skill required.
-3. **HTML dashboard**: fill `dashboard-template.html`'s placeholders
-   (`{{ENTITY}}`, `{{PERIOD}}`, `{{PL_ROWS}}`, `{{CASH_POSITION}}`,
-   `{{TOP_MOVERS}}`, `{{PENDING_DRAFTS}}`, `{{GENERATED_AT}}`) from this
-   session's query results and write the filled copy next to the books.
-   `{{PL_ROWS}}` and `{{TOP_MOVERS}}` are row-fragment insertion points —
-   see the HTML comment beside each token in the template for the exact
-   `<tr>` shape expected. The template is self-contained (inline CSS, no
-   JS, no external requests) — keep it that way; don't add a script tag
-   or a remote font/asset link when filling it in. This is the ephemeral
-   management view: a scan for whoever runs the business, regenerated
-   whenever it is asked for, and not the document a bank or an
-   accountant receives. That one is §8's.
-4. When the ledger has a brand kit, take the dashboard's palette from
-   `get_brand_kit` rather than leaving it on the shipped colours. In the
-   COPY you write (never in the template itself), set the `:root`
-   custom properties from the kit: `--bg` from `colour_paper`, `--fg`
-   from `colour_ink`, `--heading` from `colour_primary`, `--muted` from
-   `colour_muted`, `--accent` from `colour_accent`, `--border` from
-   `colour_rule`, and `--font-serif`/`--font-sans` from
-   `font_heading`/`font_body`. `--card-bg` has no brand field to draw
-   from and stays on the dashboard's shipped value. Leave a property
-   alone where the kit leaves its field unset, and if you recolour the
-   light palette either recolour the `prefers-color-scheme: dark` block
-   to match or drop it — never leave the two disagreeing. The dashboard
-   has no logo slot; the brand mark belongs on §8's rendered report.
-5. **Artifact publishing**: when the client supports it, publish the
-   filled dashboard (or a `render_report` document) as an Artifact
-   instead of, or alongside, writing it to disk.
-6. Every number still comes from §1's query tools whatever the format —
+3. **A statement to print or send** is §8's rendered document. When the
+   client supports Artifacts, publish its `html` exactly as returned;
+   otherwise save it next to the books. Never lay a statement out
+   yourself: the ledger's report template and brand kit are how its
+   statements look, and a page you lay out yourself looks like nothing
+   the human set up.
+4. **A dashboard** is §12's: the few figures the human chose to watch,
+   kept live where the client allows it. It is not a statement, and a
+   statement is not a dashboard.
+5. Every number still comes from §1's query tools whatever the format —
    with §8 as the one exception worth naming: a `render_report` document
    is built server-side from its own query, so its figures are the
    query's own and there is nothing in it for you to fill in, restate or
    check by hand.
+
+## 12. Dashboards: the figures the human chose, kept live
+
+1. **Ask first.** A dashboard is for keeping an eye on the few figures
+   that matter to whoever runs the business, and which ones matter is
+   theirs to say, so no set comes ready-made. Read the ledger's
+   conventions (`read_conventions`) for a dashboard line from an
+   earlier conversation (step 2). With none, ask what they want to
+   watch, offering a short list this ledger can answer, such as:
+   - cash in the bank now (`balance_sheet`, or `account_ledger` on the
+     bank account);
+   - revenue, gross profit or net profit this month against last
+     (`profit_and_loss` with `compare`);
+   - where the money went this month, by expense account
+     (`profit_and_loss`);
+   - what customers owe, and how much of it is overdue
+     (`aged_receivables`);
+   - the GST for the current period (`gst_return`);
+   - drafts waiting for approval (`list_drafts`).
+   Build only what they pick. If they would rather you chose, pick three
+   to five, and say which.
+2. **Keep the choice.** Record it in one line with `append_convention`
+   ("Dashboard: cash at bank, revenue against last month, overdue
+   invoices"), so the next dashboard starts from it. Ask again only when
+   they want a change, and record the new choice the same way. A
+   read-only connection cannot record it; say which figures you built
+   instead, so the human can ask for the same again.
+3. **Every figure** comes from its tool, called fresh (§1). A change
+   against an earlier period comes from the tool's own `compare` (§5),
+   never from a subtraction of your own. Label each figure with the
+   period or date it covers ("Revenue, September to date").
+4. **Live where the client allows it.** When the client lets an
+   artifact call Qunei's tools itself, the dashboard loads its figures
+   when it opens and again every five minutes while it stays open,
+   shows when it last loaded them, and has a Refresh button. It only
+   reads: it never calls a tool that changes the books. Where the client
+   cannot do that, build it with the figures as they stand now, say so
+   on the page, and offer to build it again later.
+5. **Look.** Take the look from the ledger's brand kit
+   (`get_brand_kit`), so the dashboard sits beside the printed report:
+   `colour_paper` behind everything, `colour_ink` for text,
+   `colour_primary` for headings, `colour_accent` for the figure that
+   matters most, `colour_muted` for labels and periods, `colour_rule`
+   for lines, and the kit's heading, body and numeric fonts, with
+   tabular figures. Where the kit leaves a field unset, use
+   `dashboard-template.html`'s shipped value, which mirrors qunei.ai.
+   Keep it light like the report, unless the human asks for dark.
+6. **A file instead of an artifact.** For a client that only writes
+   files, fill `dashboard-template.html` and write the filled copy next
+   to the books. Its placeholders are `{{ENTITY}}`, `{{PERIOD}}`,
+   `{{PL_ROWS}}`, `{{CASH_POSITION}}`, `{{TOP_MOVERS}}`,
+   `{{PENDING_DRAFTS}}` and `{{GENERATED_AT}}`. `{{PL_ROWS}}` and
+   `{{TOP_MOVERS}}` are row-fragment insertion points: the HTML comment
+   beside each token in the template gives the exact `<tr>` shape. Fill
+   the blocks that match what the human chose, and drop the rest from
+   the copy. The template is self-contained (inline CSS, no JS, no
+   external requests); keep it that way, with no script tag and no
+   remote font or asset link, which also means the file cannot refresh
+   itself. In the COPY you write (never in the template itself), set
+   the `:root` custom properties from the brand kit: `--bg` from
+   `colour_paper`, `--fg` from `colour_ink`, `--heading` from
+   `colour_primary`, `--muted` from `colour_muted`, `--accent` from
+   `colour_accent`, `--border` from `colour_rule`, and
+   `--font-serif`/`--font-sans` from `font_heading`/`font_body`.
+   `--card-bg` has no brand field and keeps its shipped value. Leave a
+   property alone where the kit leaves its field unset, and if you
+   recolour the light palette, recolour the `prefers-color-scheme: dark`
+   block to match or drop it: never leave the two disagreeing.
+7. A dashboard is the management view, rebuilt whenever it is asked
+   for. It carries no logo; the brand mark belongs on §8's report, which
+   stays the document a bank or an accountant receives.
 
 See qunei-month-review for the periodic scan this skill often renders
 the output of, and qunei-bookkeeping for the session rules (briefing
