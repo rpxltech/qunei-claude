@@ -1,6 +1,6 @@
 ---
 name: qunei-reports
-description: Use when asked to present, report, or visualize a Qunei entity's financial statements — in-chat tables, a CSV, a live dashboard or artifact of the figures the human watches, or a rendered, brand-styled report document to print or send — including restyling the report template or setting the ledger's brand kit (logo, colours, fonts).
+description: Use when asked to present, report, or visualize a Qunei entity's financial statements — in-chat tables, a CSV, a live dashboard or artifact of the figures the human watches, a rendered, brand-styled report document to print, send or save as issued — including restyling the report template or setting the ledger's brand kit (logo, colours, fonts), and setting budgets and reporting budget against actual to a board or a funder (a fund's or grant's own figures by tag).
 ---
 
 # Qunei Reports
@@ -13,7 +13,8 @@ it renders what the query tools return, this session, every time.
 
 1. Every figure in any report comes from `trial_balance`,
    `profit_and_loss`, `balance_sheet`, `aged_receivables`,
-   `account_ledger`, or `find_entries` called in the current session —
+   `budget_variance`, `account_ledger`, or `find_entries` called in the
+   current session (and a budget's own figures from `get_budget`) —
    never from memory, never from a number you or the human mentioned
    earlier in this conversation or a prior one. One scoped exception:
    a dashboard (§12) may also show what none of those tools report,
@@ -341,16 +342,18 @@ it renders what the query tools return, this session, every time.
 
 1. `render_report` returns the finished report as a complete HTML
    document. `report` names which one — `profit_and_loss`,
-   `balance_sheet`, `trial_balance` or `aged_receivables`, and nothing
-   else (anything else is refused as `grammar.malformed-line`, naming
-   the four). One call is the whole job: the server re-runs the query,
+   `balance_sheet`, `trial_balance`, `aged_receivables` or
+   `budget_variance` (§13), and nothing else (anything else is refused as
+   `grammar.malformed-line`, naming them all). One call is the whole
+   job: the server re-runs the query,
    builds the statement table, applies the ledger's own template and
    brand kit, and hands back the document.
 2. The payload is `entity`, `report`, `title`, `period`, `source`,
    `template_version`, `brand`, `brand_version`, `html`. `html` is the
    document. `title` is what it prints ("Profit and loss", "Balance
-   sheet", "Trial balance", "Aged receivables"). `period` is what was
-   actually drawn — `{ from, to }` for a P&L, `{ from, as_of }` for the
+   sheet", "Trial balance", "Aged receivables", "Budget and actual").
+   `period` is what was actually drawn — `{ from, to }` for a P&L or a
+   budget comparison, `{ from, as_of }` for the
    trial balance (which is drawn AT a date over a movement window, and
    prints both), and the as-of date alone for the balance sheet and the
    aging — so quote the window from here rather than from the parameters
@@ -374,13 +377,15 @@ it renders what the query tools return, this session, every time.
 5. Each report takes its own parameters, and a parameter the chosen
    report cannot consume is REFUSED rather than ignored:
    - `profit_and_loss` — `from` and `to` (both required), `book`,
-     `view`, `as_at`, `compare`.
+     `view`, `as_at`, `compare`, `tags` (§13.9).
    - `balance_sheet` — `at` (required), `book`, `view`, `as_at`,
      `compare`.
    - `trial_balance` — `at` (required), `from`, `book`, `view`, `as_at`.
    - `aged_receivables` — `at` (defaults to today), `customer`.
+   - `budget_variance` — `budget` (required), `from` and `to` (default
+     to the budget's whole span), `book`, `view`, `as_at`.
 
-   `codes` and `prepared_on` are accepted by all four. So `customer` on
+   `codes` and `prepared_on` are accepted by all of them. So `customer` on
    a P&L, `compare` on a trial balance, or `view` on an aging comes back
    as `grammar.malformed-line` naming the parameter, rather than being
    quietly dropped while you believe it took effect. Missing required
@@ -390,7 +395,7 @@ it renders what the query tools return, this session, every time.
    the query tools.
 6. `codes` prints the account code beside each account name. It defaults
    to TRUE for `trial_balance` — a working paper is read against the
-   chart — and to false for the other three; pass it either way to
+   chart — and to false for the others; pass it either way to
    override. The aging has no code column at all, so `codes` changes
    nothing there.
 7. `compare` is §5's parameter unchanged: `"prior-period"` or
@@ -419,7 +424,7 @@ it renders what the query tools return, this session, every time.
 
 ## 9. Restyling: a template edit, never a per-render option
 
-1. One template styles all four reports, and editing it changes every
+1. One template styles every report, and editing it changes every
    future `render_report` call — every report, every period, starting
    with the very next render. There is no per-render style override, the
    same owner ruling qunei-invoicing §4.1 states for invoices. A request
@@ -481,7 +486,7 @@ it renders what the query tools return, this session, every time.
    silently, forever:
    - Table: `statement`, plus one of `statement-profit_and_loss`,
      `statement-balance_sheet`, `statement-trial_balance`,
-     `statement-aged_receivables`.
+     `statement-aged_receivables`, `statement-budget_variance`.
    - Row groups: `section` (one per statement section) and
      `customer-group` (one per customer and currency on the aging).
    - Rows: `section-title`, `line`, `line-computed` (a derived line —
@@ -499,8 +504,11 @@ it renders what the query tools return, this session, every time.
    - Cells: `account`, `code`, `type`, `amount`, `neg` (added to any
      figure printed in parentheses), `comparative`, `variance`,
      `variance-pct`; the trial balance's `opening`, `debits`, `credits`,
-     `closing`; and the aging's `bucket` with `bucket-current`,
-     `bucket-1-30`, `bucket-31-60`, `bucket-61-90`, `bucket-over-90`.
+     `closing`; the aging's `bucket` with `bucket-current`,
+     `bucket-1-30`, `bucket-31-60`, `bucket-61-90`, `bucket-over-90`;
+     and, on a budget comparison's every `variance` cell, exactly one of
+     `favourable` or `unfavourable` (the default chrome prints F or U
+     after the figure).
    - `control-off` and `neg` are the two worth making impossible to read
      past. A failed reconciliation and a negative figure are findings,
      not decoration.
@@ -617,8 +625,8 @@ it renders what the query tools return, this session, every time.
     and the reports still render. Never invent a hex code to fill a
     slot, and never substitute a lookalike stack for a licensed
     typeface without telling the human that is what you did.
-11. Then render one sample of EACH of the four reports with
-    `render_report` and look at all four. A kit that reads well on a
+11. Then render one sample of EACH report with
+    `render_report` and look at every one. A kit that reads well on a
     P&L can fail on the trial balance's four numeric columns or the
     aging's bucket grid. Iterate one `update_brand_kit` call at a time —
     contrast on the rule and muted colours, a logo that swamps the
@@ -653,6 +661,17 @@ it renders what the query tools return, this session, every time.
    check by hand.
 
 ## 12. Dashboards: the figures the human chose, kept live
+
+**Qunei's own dashboard first.** Every ledger has a live dashboard page
+in Qunei (`get_dashboard` returns its figures and its `url`), which
+anyone who can read the ledger opens in a browser, no assistant needed,
+and which refreshes itself every five minutes. Its tiles are cash,
+income and expenses, a budget against actual (to the end of the last
+finished month), funds, money owed, expense claims waiting and owed, and
+work waiting. When the person wants a dashboard to keep, ask which figures
+they watch and set them with `update_dashboard`, then give them the
+link. Build your own, as below, when they want it in the conversation
+or want figures the tiles do not cover.
 
 1. **Ask first.** A dashboard is for keeping an eye on the few figures
    that matter to whoever runs the business, and which ones matter is
@@ -722,6 +741,104 @@ it renders what the query tools return, this session, every time.
 7. A dashboard is the management view, rebuilt whenever it is asked
    for. It carries no logo; the brand mark belongs on §8's report, which
    stays the document a bank or an accountant receives.
+
+## 13. Budgets, budget against actual, and accountability reports
+
+1. **A budget is a ledger document**, versioned like the chart, so its
+   history is its audit trail. `set_budget` writes a whole budget
+   (replacing that name's last version, every version kept),
+   `list_budgets` lists every budget with its totals, and `get_budget`
+   shows one in full, line by line and month by month.
+2. **Setting one.** `name` (lowercase letters, digits and hyphens, such
+   as `operating-2026-27`), an optional `title` (printed on the report),
+   `start` (`YYYY-MM`) and `months` (1 to 60): a budget can follow the
+   financial year or a grant's own period. Each line names an income or
+   expense account, by name or code, with either `amounts` (exactly one
+   per month) or `annual` (spread evenly, the cents left over landing in
+   the last month). Amounts are in natural sign, the way a person writes
+   a budget: income earned and expenses spent are both positive, and a
+   negative is a contra such as discounts allowed. They are in the
+   ledger's currency at its decimal places.
+3. **The figures are the human's.** A budget is a plan someone approves,
+   so never invent a line or a figure. Confirm every line with the human
+   before writing. When they want last year as a starting point, read it
+   with `profit_and_loss` (say which period), show it, and pass on only
+   what they confirm.
+4. **Refusals.** `set_budget` checks the whole budget first and refuses
+   with every problem at once (`budget.invalid`: an undeclared or
+   non-income/expense account, the wrong number of amounts, an amount at
+   the wrong scale, a duplicate account, an undeclared filter key, a bad
+   name, start, months or title). Nothing is saved; fix them all and send
+   the whole budget again. Its response is the budget as written, in
+   `get_budget`'s shape: check an annual figure's spread there.
+5. **A fund's, grant's or project's budget** carries a `filter` of
+   dimension tags, such as `{ "fund": "lotteries-2026" }`: only postings
+   carrying every filter tag count as its actuals. Each key must be a
+   dimension the ledger declares. The tag goes on each posting when it is
+   coded (the posting's own `tags`, such as `{ "fund": "lotteries-2026" }`,
+   when it is staged), and an untagged posting never counts, so when a
+   likely grant expense is missing from the comparison, say so and offer
+   to amend that entry to carry the tag (`amend_entry`), rather than
+   assuming the money was not spent.
+6. **Budget against actual is one call**, `budget_variance`, never your
+   own subtraction. It lays the profit and loss out exactly as
+   `profit_and_loss` does (the same sections, contras and unmapped
+   sections), and every line, every section `total` and every subtotal
+   carries `actual`, `budget`, `variance` (actual less budget),
+   `variance_pct` (against the budget's size; null when the budget is
+   zero, so show "n/a") and `favourable`. Present them as four columns,
+   Actual, Budget, Variance and %, and say which variances are
+   favourable: income at or above budget, expenses at or below it, a
+   profit or surplus at or above it. A variance's sign alone does not
+   say that, because more income is good and more spending is not. An
+   account with actuals and no budget line shows a budget of zero, and a
+   budget line with no actuals an actual of zero: those rows are usually
+   the findings, so name them.
+7. **The window** defaults to the budget's whole span. `from` must be
+   the first day of one of its months and `to` the last day of one, or
+   the call is refused with `budget.window-misaligned`, whose message
+   names the span. Year to date runs from the budget's first day to the
+   last day of the latest finished month; one month is that month's first
+   and last day.
+8. **To print or send it**, `render_report` with `report:
+   "budget_variance"` and `budget` (plus `from`, `to`, `book`, `view` or
+   `as_at` when needed) is the finished document, titled "Budget and
+   actual". Its basis line names the budget and its filter, its amount
+   columns are headed Actual and Budget, and the default chrome prints F
+   or U after each variance. §8's rules hold: deliver it as written.
+9. **A fund with no budget** is reported with `profit_and_loss` and
+   `tags`, such as `{ "fund": "lotteries-2026" }`: only postings carrying
+   every tag count, and the response names the tags. `render_report`
+   takes the same `tags` for a `profit_and_loss`, and its basis line
+   names them, so the page can never be read as the whole ledger's.
+10. **Accountability reports.** To a board: `budget_variance` for the
+    year's budget, month by month or year to date. To a funder: the
+    grant's own budget, with its `filter`, rendered over the grant's
+    period: the grant received, each kind of spending against what the
+    funder approved, and the surplus (the unspent funds). What the money
+    achieved is narrative: it stays in your own words around the document,
+    or in a charity's statement of service performance, and never goes
+    into the rendered report, which carries only the figures the tools
+    computed. Never state a figure in that narrative that a tool did not
+    return this session (§1).
+
+## 14. Saved reports: issued once, read the same forever
+
+1. A report someone is sent (a board pack, a funder's report, the
+   charity performance report) is saved with `save_report`, which takes
+   `render_report`'s parameters and a title, renders it exactly as
+   `render_report` would and keeps the finished document in the ledger.
+   It reads the same from then on, whatever happens to the books.
+2. Give the person the page link it returns rather than re-rendering:
+   anyone who can read the ledger opens it, a board member without an
+   assistant included. `list_saved_reports` lists every saved report,
+   newest first, with its link and the parameters that produced it.
+3. Save only what the person says is final. A report is never edited
+   or removed once saved; to correct one, save a new one and say which
+   it replaces. At most 20 saves per ledger a day.
+4. The reports page in Qunei (beside each ledger on the workspace
+   page) also opens today's statements as finished documents and lets a
+   member save a copy, so the person can do this themselves.
 
 See qunei-month-review for the periodic scan this skill often renders
 the output of, and qunei-bookkeeping for the session rules (briefing

@@ -206,6 +206,50 @@ bookkeeper would.
 6. A read-only connection answers questions from the query tools and
    changes nothing.
 
+## 13. Expense claims
+
+1. People spend their own money for a ledger and claim it back. A member
+   sets the ledger up once with `configure_expense_claims`: the liability
+   account claims are owed from (`payable`: usually the ledger's existing
+   Accounts Payable, as Xero does; a separate liability only when the
+   human wants staff reimbursements kept apart), whether the ledger splits
+   tax (`split_tax: true` when it is registered for GST or VAT, §8), and
+   the expense accounts people may claim against, each with the label they
+   see. A claim's cost always goes to the expense account its category
+   names (travel to the travel account); the payable only holds what the
+   person is owed until they are paid back. Ask the human for every one of
+   these; never guess them. Each call states the whole setup again.
+2. A claim is always the claimant's own. `submit_expense_claim` stages a
+   draft for the signed-in person, crediting the payable with their
+   `claimant:` tag, and splits the tax out by the category's default code
+   when the ledger splits tax. There is no way to name someone else, and
+   you never make a claim for anyone through the claims tools. When a
+   receipt for a colleague's spending reaches the inbox, code it as an
+   ordinary draft with `stage_drafts`, crediting the payable with the
+   colleague's `claimant:` tag (their email address lower-cased, with `@`
+   written as `-at-`, as `list_expense_claims` shows it), and tell the
+   human you did.
+3. `list_expense_claims` shows every claim, where it stands (waiting,
+   approved, reversed, declined or withdrawn) and what each person is
+   owed. A waiting claim is a draft: approve it with `approve_drafts` once
+   the human says so, or decline it with `decline_expense_claim` and the
+   reason the human gives, in one line, which the person sees. Prefer
+   declining to `discard_draft`: a discarded claim leaves its person no
+   record of why. The person may withdraw their own waiting claim with
+   `withdraw_expense_claim`.
+4. Reimbursing is ordinary bookkeeping. When the bank pays a person back,
+   code the payment to the payable account with that person's `claimant:`
+   tag, exactly as their claims carry it, so what they are owed drops by
+   what was paid. One payment for several claims is one posting of the
+   total.
+5. `role.claims-only` means the person has expense claims only on that
+   ledger: `list_expense_claims`, `submit_expense_claim` and
+   `withdraw_expense_claim` work for them, and every other tool is refused.
+   It is the rule working; do not try other tools for them. They see only
+   their own claims, and each waits for a member.
+6. Claims are in the ledger's own currency. A receipt in another currency
+   is converted first (§11), or a member codes it.
+
 See qunei-conventions for how learned rules get recorded and consulted,
 qunei-onboard for setting up a new entity from scratch, and qunei-nz-gst
 for the GST-registered net-split convention and the return it feeds.

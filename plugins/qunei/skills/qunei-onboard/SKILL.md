@@ -61,6 +61,10 @@ Ask through all of these before calling anything:
    codes:
    - New Zealand: `nz-company` (NZD, 31 March, `en-NZ`; GST codes
      `gst-standard` at 15%, `gst-zero`, `gst-exempt`).
+   - A New Zealand charity or incorporated society: `nz-charity` (as
+     `nz-company`, with a charity's chart already set up for the Tier 3
+     and Tier 4 performance report and a `fund` dimension for restricted
+     funds). qunei-nz-charities takes it from there.
    - Australia: `au-company` (AUD, 30 June, `en-AU`; GST codes `gst` at
      10%, `gst-free`, `input-taxed`, `bas-excluded`).
    - United Kingdom: `uk-company` (GBP, 31 March, `en-GB`; VAT codes
@@ -191,10 +195,12 @@ Ask through all of these before calling anything:
 
 1. `invite_user` invites a person to the workspace by email. Grants and
    roles are named at invite time: `grants` is one `{entity, role}`
-   object per ledger they should reach — role `viewer` (read
-   everything, write nothing) or `member` (full bookkeeping). Ledgers
-   not granted stay invisible to them; accepting never widens beyond
-   what the invite named.
+   object per ledger they should reach — one of three roles: `viewer`
+   (read everything, write nothing), `member` (full bookkeeping) or
+   `claimant`, shown to people as Expense claims only (they submit and
+   follow their own expense claims on that ledger, and see nothing else
+   of it). Ledgers not granted stay invisible to them; accepting never
+   widens beyond what the invite named.
 2. Billing-owner-only: only the workspace's billing owner can invite —
    anyone else is refused with `role.write-denied`. Relay that refusal
    plainly and name the recovery: the billing owner sends the invite
@@ -207,7 +213,9 @@ Ask through all of these before calling anything:
 4. Interview before inviting, §2's manners: which ledgers, which role
    on each, confirmed back before the call. An accountant usually
    starts as `viewer`; upgrade to `member` when they actually keep the
-   books.
+   books. Staff and volunteers who only claim back what they spend get
+   `claimant` on the ledger that pays them back; that ledger needs
+   `configure_expense_claims` first (qunei-bookkeeping §13).
 
 ## 9. Archiving a ledger
 
