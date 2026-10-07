@@ -125,10 +125,13 @@ a transaction settled at the bank but not yet synced.
 
 ## 9. refused:, missing:, unmapped: rows
 
-1. `refused[]` rows are transactions the item format rejected — never
-   silently dropped. Act while they are re-offered (inside the 7-day
+1. `refused[]` rows are transactions set aside, never silently dropped:
+   ones the item format rejected, and ones whose amount is more than the
+   books can hold (1,000,000,000,000 or more), which no entry could carry;
+   `error` says which. Act while they are re-offered (inside the 7-day
    overlap); afterwards the line is entered by hand and §8 catches a miss as
-   drift.
+   drift. An amount that size is almost always the bank's error: check it
+   with the person before entering anything.
 2. `missing[]` rows are mapped accounts no fetched connection returned — a
    closed account, or a person whose connection was revoked this run (see
    `users[]`). Reconnect, or fix the mapping.
@@ -144,7 +147,7 @@ of a session, read `feeds.last_sync` in the briefing. It describes the
 latest sync, whether the morning run (`trigger: "schedule"`) or an
 assistant (`"assistant"`) made it, and is null before the first one.
 1. `outcome: "synced"` is normal, and `new` is how many transactions
-   landed. A non-zero `refused` means the item format rejected some: run
+   landed. A non-zero `refused` means some were set aside: run
    `sync_bank_feed` to see them in `refused[]` (§9) while they are still
    re-offered.
 2. `outcome: "refused"` means the sync stopped before landing anything, and

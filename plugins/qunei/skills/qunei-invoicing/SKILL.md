@@ -54,7 +54,11 @@ as many times, in as many formats, as anyone asks.
 2. `draft_invoice` builds the draft and returns a computed totals preview
    (`subtotal`, `tax_by_code`, `total`) alongside its substance — the
    exact figures an eventual issue would post. The draft's own `number`
-   is null; nothing has been assigned yet.
+   is null; nothing has been assigned yet. A quantity, unit price, line or
+   total of 1,000,000,000,000 or more is refused with `invoice.too-large`,
+   naming the field and the line, and nothing is saved: `draft_invoice`
+   and `update_invoice` both check it. It is almost always a stray digit,
+   so confirm the figure with the human.
 3. Show the human a compact totals table before anything else happens:
    line items, subtotal, tax, total — and say plainly that the number
    isn't assigned yet, never a placeholder that could be mistaken for the

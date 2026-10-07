@@ -100,7 +100,12 @@ are already in effect — read that first if you haven't.
    - `no-money-leg` — a tagged entry with no asset-type posting:
      normal for an invoice-basis accrual (revenue + AR, no bank yet),
      but on a payments basis it usually means GST is being claimed on
-     money that hasn't moved yet.
+     money that hasn't moved yet. An expense claim (qunei-bookkeeping
+     §13) has no money leg by design: it credits the payable, and the
+     bank moves only in a separate entry when the person is reimbursed.
+     So expect this warning on a claim's entry, on either basis; it
+     stays after the claim is reimbursed, and the claim must not be
+     amended to clear it.
    - `unknown-invoice-payment` — a receipt tagged `invoice:<number>`
      names a number no issued invoice matches: check the number, or
      `amend_entry` a mis-tagged receipt.

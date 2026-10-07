@@ -507,8 +507,11 @@ it renders what the query tools return, this session, every time.
      `closing`; the aging's `bucket` with `bucket-current`,
      `bucket-1-30`, `bucket-31-60`, `bucket-61-90`, `bucket-over-90`;
      and, on a budget comparison's every `variance` cell, exactly one of
-     `favourable` or `unfavourable` (the default chrome prints F or U
-     after the figure).
+     `favourable` or `unfavourable`. The cell prints the letter F or U
+     itself, with its word beside it in a `visually-hidden` span that the
+     default chrome sets off the page, so a template needs no `::after`
+     content for it: the two rules of the old default that printed it are
+     left out when a template is rendered.
    - `control-off` and `neg` are the two worth making impossible to read
      past. A failed reconciliation and a negative figure are findings,
      not decoration.
@@ -560,8 +563,10 @@ it renders what the query tools return, this session, every time.
    a guess here is not a small one.
 5. The fields, with the grammar each is held to:
    - `name` — printed at the top of every report, at most 120
-     characters. Unset, it falls back to the invoicing seller name when
-     one is configured, else the ledger slug.
+     characters, except a charity performance report whose narrative
+     gives a legal name (qunei-nz-charities), which prints that name
+     instead. Unset, it falls back to the invoicing seller name when one
+     is configured, else the ledger slug.
    - `colour_ink`, `colour_paper`, `colour_primary`, `colour_accent`,
      `colour_muted`, `colour_rule` — six hex digits with a leading `#`
      (`#a04e26`). No named colours, no `rgb()`, no `var()`.
@@ -673,6 +678,18 @@ they watch and set them with `update_dashboard`, then give them the
 link. Build your own, as below, when they want it in the conversation
 or want figures the tiles do not cover.
 
+**In their brand once they have one.** Qunei's dashboard is
+Qunei-branded until the ledger has its own brand kit (§10: any field
+set, a logo alone included). From then on it carries their brand, as a
+report does: the kit's logo, colours, fonts and name. `get_dashboard`
+says which it carries (`branding`: `qunei` or `own`) and whether the
+ledger has a kit (`brand_kit`). Once a kit is set, tell the person the
+dashboard now carries it, and ask whether they would rather keep Qunei's
+branding: `update_dashboard` with `brand: "qunei"` keeps it, even when
+the kit changes later, and `brand: "own"` shows their brand again. Pass
+`brand` alone to leave the tiles as they are. Whoever may change the
+dashboard is offered the same choice on the page itself.
+
 1. **Ask first.** A dashboard is for keeping an eye on the few figures
    that matter to whoever runs the business, and which ones matter is
    theirs to say, so no set comes ready-made. Read the ledger's
@@ -738,9 +755,10 @@ or want figures the tiles do not cover.
    property alone where the kit leaves its field unset, and if you
    recolour the light palette, recolour the `prefers-color-scheme: dark`
    block to match or drop it: never leave the two disagreeing.
-7. A dashboard is the management view, rebuilt whenever it is asked
-   for. It carries no logo; the brand mark belongs on §8's report, which
-   stays the document a bank or an accountant receives.
+7. A dashboard you build is the management view, rebuilt whenever it is
+   asked for. It carries no logo; the brand mark belongs on §8's report,
+   which stays the document a bank or an accountant receives, and on
+   Qunei's own dashboard once the ledger has a brand kit (above).
 
 ## 13. Budgets, budget against actual, and accountability reports
 
@@ -748,7 +766,17 @@ or want figures the tiles do not cover.
    history is its audit trail. `set_budget` writes a whole budget
    (replacing that name's last version, every version kept),
    `list_budgets` lists every budget with its totals, and `get_budget`
-   shows one in full, line by line and month by month.
+   shows one in full, line by line and month by month. A budget set by
+   mistake is withdrawn, never deleted: say which one, and confirm it
+   with the human, then call `set_budget` with `withdraw: true` and its
+   `name` (and `entity`, where the workspace has more than one ledger)
+   and nothing else. That writes a new version marked withdrawn and
+   keeps every earlier one. A withdrawn budget leaves `list_budgets`
+   (`include_withdrawn: true` lists it, marked `withdrawn: true`), the
+   default dashboard and the reports page; `get_budget` still shows it
+   with `withdrawn: true`, and `budget_variance` and `render_report`
+   refuse it with `budget.withdrawn`. Setting the whole budget again
+   reinstates it.
 2. **Setting one.** `name` (lowercase letters, digits and hyphens, such
    as `operating-2026-27`), an optional `title` (printed on the report),
    `start` (`YYYY-MM`) and `months` (1 to 60): a budget can follow the
@@ -793,7 +821,11 @@ or want figures the tiles do not cover.
    say that, because more income is good and more spending is not. An
    account with actuals and no budget line shows a budget of zero, and a
    budget line with no actuals an actual of zero: those rows are usually
-   the findings, so name them.
+   the findings, so name them. The response also carries `budget_version`
+   (`number` and `set_on`, the day it was set): say which version of the
+   budget the comparison used, because a budget is rewritten in place.
+   `view: "as-at"` dates the books and not the budget, so it always uses
+   the budget's current version.
 7. **The window** defaults to the budget's whole span. `from` must be
    the first day of one of its months and `to` the last day of one, or
    the call is refused with `budget.window-misaligned`, whose message
@@ -803,9 +835,11 @@ or want figures the tiles do not cover.
 8. **To print or send it**, `render_report` with `report:
    "budget_variance"` and `budget` (plus `from`, `to`, `book`, `view` or
    `as_at` when needed) is the finished document, titled "Budget and
-   actual". Its basis line names the budget and its filter, its amount
-   columns are headed Actual and Budget, and the default chrome prints F
-   or U after each variance. §8's rules hold: deliver it as written.
+   actual". Its basis line names the budget, its version (such as
+   "version 3, set 2 October 2026") and its filter, its amount columns
+   are headed Actual and Budget, and each variance cell prints F or U
+   after its figure, with the word for a screen reader (§9). §8's rules
+   hold: deliver it as written.
 9. **A fund with no budget** is reported with `profit_and_loss` and
    `tags`, such as `{ "fund": "lotteries-2026" }`: only postings carrying
    every tag count, and the response names the tags. `render_report`
@@ -835,7 +869,7 @@ or want figures the tiles do not cover.
    newest first, with its link and the parameters that produced it.
 3. Save only what the person says is final. A report is never edited
    or removed once saved; to correct one, save a new one and say which
-   it replaces. At most 20 saves per ledger a day.
+   it replaces. At most 20 saves per ledger in any 24 hours.
 4. The reports page in Qunei (beside each ledger on the workspace
    page) also opens today's statements as finished documents and lets a
    member save a copy, so the person can do this themselves.
