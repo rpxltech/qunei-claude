@@ -2,7 +2,7 @@
   "name": "qunei",
   "displayName": "Qunei",
   "description": "Keep your books in Qunei from Claude: set up a ledger, code bank statements and see reports. Nothing posts until you approve it.",
-  "version": "2026.10.10",
+  "version": "2026.10.10.2",
   "author": {
     "name": "Qunei",
     "url": "https://qunei.ai",
@@ -10,5 +10,8 @@
   },
   "homepage": "https://qunei.ai",
   "repository": "https://github.com/rpxltech/qunei-claude",
-  "privacyPolicyUrl": "https://qunei.ai/privacy"
+  "privacyPolicyUrl": "https://qunei.ai/privacy",
+  "documentationUrl": "https://qunei.ai/connect",
+  "supportUrl": "https://qunei.ai/support",
+  "termsOfServiceUrl": "https://qunei.ai/terms"
 }
