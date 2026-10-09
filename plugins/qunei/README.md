@@ -50,7 +50,10 @@ The plugin is instructions and one web address. Nothing in it runs on
 your computer. Its one connector is Qunei, at https://qunei.ai/mcp: when you
 use it, Claude sends Qunei what you ask it to record or look up,
 including the statements and documents you share for that, and only
-after you sign in to Qunei. Qunei’s privacy policy: https://qunei.ai/privacy.
+after you sign in to Qunei. When you ask Claude to read a document you
+sent to Qunei, or to save a copy of your books, it downloads the file
+from a ten-minute link on https://qunei.ai. It reads or saves the file and
+never runs it. Qunei’s privacy policy: https://qunei.ai/privacy.
 
 ## Updates
 
