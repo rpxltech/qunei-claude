@@ -98,6 +98,14 @@ on its merits and move on.
    "akahu:<akahu_id>"`) or `get_entry`.
 3. Correct it with `amend_entry`; the replacement must NOT repeat the source
    tag. The item does not reappear afterwards.
+4. Akahu sometimes sends a transaction again under a new `akahu_id`, for
+   example after the person reconnects. When the old id has gone from
+   Akahu's answer and the account, day, amount and description all match,
+   the sync recognises it, counts it in `skipped` and never lands it
+   twice. Two genuine identical charges on one day still both land. If two
+   uncoded items still look like one transaction landed twice, code only
+   one and tell the person, who can ask Qunei (hello@qunei.ai) to set the
+   other aside.
 
 ## 7. Lag, history, and the banks
 
