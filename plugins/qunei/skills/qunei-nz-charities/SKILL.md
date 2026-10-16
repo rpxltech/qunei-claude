@@ -17,15 +17,28 @@ assumes qunei-bookkeeping's session rules are in effect.
 ## 1. Tier first, and ask rather than assume
 
 1. Start with `get_briefing`, then ask the person which tier the entity
-   reports under. Tier 4 is for an entity without public accountability
-   whose annual operating payments are under $140,000; Tier 3 for one
-   whose total expenses are less than $5 million, as the Tier 3
-   template's own words have it. On Tier 3 the report's `tier-threshold`
-   finding flags expenses of $5 million or more for a person to confirm.
-   XRB A1 sets the exact test, including how earlier years count, and an
-   entity may choose a higher tier, so the tier is the person's (or
-   their accountant's) decision, never yours. Say so if this year's
-   figures look near a limit.
+   reports under. The tier is the person's (or their accountant's)
+   decision, never yours, and an entity may choose a higher tier than it
+   needs.
+   - Tier 3 is for an entity without public accountability whose total
+     expenses are $5 million or less (XRB A1). One already on Tier 3 that
+     goes over may stay on it for the first year its expenses go over and
+     the year after (XRB A1, paragraphs 51 and 59).
+   - Tier 4 is for an entity without public accountability that is not a
+     specified not-for-profit entity. It is one in any year after two
+     years in a row of operating payments, with those of any entities it
+     controls, of $140,000 or more (XRB A2). Tier 4 has no year of grace
+     (XRB A1, BC59): never promise one.
+   - The report's `tier-threshold` finding flags Tier 3 expenses over $5
+     million this year, and Tier 4 operating cash paid of $140,000 or more
+     last year. The report shows only two years, so on Tier 4 ask about
+     earlier ones: the year before last when last year was $140,000 or
+     more, and both earlier years when last year's column is empty (a
+     ledger new to Qunei). XRB A2 counts every payment other than a
+     capital payment, which can include payments the report's operating
+     cash paid leaves out, such as loan repayments, net GST and income
+     tax, so ask when the figures are close.
+   - Say so if this year's figures look near a limit.
 2. A new charity's ledger starts from the `nz-charity` template
    (`init_entity`, template `nz-charity`). Its chart is already mapped to
    the standard's categories, tier 3 is set, and it declares a `fund`
@@ -151,7 +164,10 @@ assumes qunei-bookkeeping's session rules are in effect.
    approved. The finding `approver-missing` says when no one is named.
 6. Set `gst` (`registered` or `not-registered`): the GST policy follows
    it, in the template's words. Leave `basis` out unless the person wants
-   their own wording; the default is the template's. `income_tax:
+   their own wording, or a `tier-threshold` finding says the default no
+   longer fits. The default is the template's, except that Tier 3's says
+   the entity elected to apply the Standard and gives XRB A1's criterion
+   as "$5 million or less". `income_tax:
    ["exempt"]` prints the template's income tax exemption, if the charity
    is exempt. When the entity began during the year, set `commenced` and
    the basis says so.
@@ -202,8 +218,10 @@ assumes qunei-bookkeeping's session rules are in effect.
      templates ask the charity to explain.
    - `first-year`: no entries before the year began, so last year's
      column is all zero. If the entity began this year, set `commenced`.
-   - `tier-threshold`: this year's figures at or over the tier's limit.
-     The tier is the person's decision.
+   - `tier-threshold`: Tier 3 expenses over $5 million this year, or
+     Tier 4 operating cash paid of $140,000 or more last year. The tier
+     is the person's decision. On Tier 3 the finding also asks for the
+     entity's own basis of preparation if it stays on Tier 3.
 3. Present the statements in the payload's own order, row by row
    (`heading`, `subheading`, `line`, `total`, `grand_total`), with the
    current year beside last year and each line's `note`. Never recompute
