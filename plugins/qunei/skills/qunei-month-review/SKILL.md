@@ -138,9 +138,34 @@ stages, or approves anything.
 5. Fold both into §6's write-up. This section, like every other one
    above, is read-only.
 
+## 5c. US tax workpaper
+
+1. When the briefing carries a `us_tax` key, this entity runs the US tax
+   pack: the same gate §5 applies to `gst`. No `us_tax` key means
+   `configure_us_tax` was never run; skip this section rather than
+   calling a tool that will refuse (`us.not-configured`).
+2. Call `us_tax_workpaper` for the year in progress, with `year_end` set
+   to the next occurrence of the briefing's `entity.fy_end` on or after
+   the review date. Report its `findings` exactly as returned, one line
+   per code: the same catalogue qunei-us-tax explains in full. This
+   skill only surfaces them: it never re-maps, adjusts or pins anything.
+   `catalog-provisional` is expected while the year's own forms are not
+   final: say so once, not as a defect. The pack carries a catalog for
+   Schedule C only, so on a ledger configured for Form 1120-S, 1065 or
+   1120 the preview refuses `us.catalog-unavailable`: say that once, as a
+   fact, with no findings to report.
+3. Add the briefing's own calendar facts: `us_tax.unpinned` (ended years
+   still to pin, one of which may be refused as provisional until its
+   forms ship, qunei-us-tax §6) and `us_tax.next_due`, where an overdue
+   date is the one that matters most, and its `problem` when it carries
+   one.
+4. Fold the results into §6's write-up: an unmapped account, a meals
+   account without its fraction and a cash method finding are exactly
+   the kind of finding `append_open_item` exists for.
+
 ## 6. Write findings, don't act on them
 
-1. For every genuine oddity from §2–§5b that needs a human decision, call
+1. For every genuine oddity from §2–§5c that needs a human decision, call
    `append_open_item` — one call per question, per qunei-bookkeeping's
    end-of-session rule (a complete sentence a future session can act on
    without today's chat history). This skill's whole write surface is
@@ -151,10 +176,12 @@ stages, or approves anything.
 
 This skill is read-only except for `append_open_item` — never call
 `post_entries`, `stage_drafts`, `approve_drafts`, `amend_entry`,
-`reverse_entry`, `configure_nz_gst`, or `file_gst_return` from here. See
+`reverse_entry`, `configure_nz_gst`, `file_gst_return`,
+`configure_us_tax`, or `pin_us_tax_workpaper` from here. See
 qunei-bookkeeping for how those get used once a finding needs action,
 qunei-nz-gst for how a GST warning or drift finding actually gets
-resolved, qunei-invoicing §7 for the chase a §5b finding often leads to,
+resolved, qunei-us-tax for how a US workpaper finding does,
+qunei-invoicing §7 for the chase a §5b finding often leads to,
 and qunei-reports for turning review output into a presented statement
 or dashboard — its §5 carries the full shape of a compared payload, its
 §6 the working trial balance's columns and signs, and its §7 the aging's.

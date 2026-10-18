@@ -123,6 +123,39 @@ bookkeeper would.
    lines get tagged, and which never do; qunei-code-statement §4 gives
    the tax fraction at each rate.
 
+## 8b. US businesses
+
+1. A US business's ledger is kept in USD (qunei-onboard §2 picks
+   `us-sole-prop` or `us-company`). §8's net-plus-tax split applies to
+   the sales tax it collects, never to the sales tax it pays: that is
+   part of the cost of what it bought, not a claim. What follows keeps
+   the books readable by the year-end workpaper (qunei-us-tax), which
+   reads each account through the line it is mapped to.
+2. Sales tax collected splits to the liability, net plus split as
+   everywhere: a 217.75 receipt for a 200.00 sale at 8.875% is 200.00 to
+   income and 17.75 to `Liabilities:Sales-Tax-Payable`, never 217.75 to
+   income. Where the ledger declares the code for the sale's place
+   (qunei-us-tax §2), tag the net line `tax:sales-tax-ny` and leave the
+   tax line untagged, as an issued invoice does. Paying the tax over to
+   the state goes straight to the liability account, untagged: it
+   settles what was collected, so it is no expense.
+3. Sales tax paid on purchases is part of the cost and is never tagged:
+   a 54.00 purchase that includes 4.00 of sales tax is a 54.00 expense,
+   with no line to the liability account.
+4. Owner draws go to the owner's draws account, an equity account mapped
+   `distributions` (`Equity:Owner-Draws` on `us-sole-prop`), never to an
+   expense account; an owner's own pay and income tax are draws too. On
+   another US ledger, propose the account with `add_account` and wait
+   for the human's yes (§2).
+5. Meals are kept apart from entertainment, each in its own account
+   (qunei-us-tax §1.7). Ask when a receipt could be either.
+6. Personal spending never goes to an expense account. When a purchase
+   may be the owner's own rather than the business's, ask; with the
+   human's yes it is a draw (item 4).
+7. Expense claims (§13) post their whole amount on a USD ledger:
+   `configure_expense_claims` refuses `split_tax: true` there, and a
+   claim never asks about NZ GST.
+
 ## 9. End of session: leave open items
 
 1. Before ending a session, call `append_open_item` for every unresolved
@@ -285,5 +318,6 @@ bookkeeper would.
    clear it (qunei-nz-gst §3).
 
 See qunei-conventions for how learned rules get recorded and consulted,
-qunei-onboard for setting up a new entity from scratch, and qunei-nz-gst
-for the GST-registered net-split convention and the return it feeds.
+qunei-onboard for setting up a new entity from scratch, qunei-nz-gst for
+the GST-registered net-split convention and the return it feeds, and
+qunei-us-tax for the year-end workpaper a US ledger's coding feeds.

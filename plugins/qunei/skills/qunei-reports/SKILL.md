@@ -13,10 +13,11 @@ it renders what the query tools return, this session, every time.
 
 1. Every figure in any report comes from `trial_balance`,
    `profit_and_loss`, `balance_sheet`, `aged_receivables`,
-   `budget_variance`, `account_ledger`, or `find_entries` called in the
-   current session (and a budget's own figures from `get_budget`) —
-   never from memory, never from a number you or the human mentioned
-   earlier in this conversation or a prior one. One scoped exception:
+   `budget_variance`, `us_tax_workpaper`, `account_ledger`, or
+   `find_entries` called in the current session (and a budget's own
+   figures from `get_budget`): never from memory, never from a number you
+   or the human mentioned earlier in this conversation or a prior one.
+   One scoped exception:
    a dashboard (§12) may also show what none of those tools report,
    each figure from the one tool that does, still queried live, this
    session: drafts waiting for approval from `list_drafts` (or
@@ -342,18 +343,20 @@ it renders what the query tools return, this session, every time.
 
 1. `render_report` returns the finished report as a complete HTML
    document. `report` names which one — `profit_and_loss`,
-   `balance_sheet`, `trial_balance`, `aged_receivables` or
-   `budget_variance` (§13), and nothing else (anything else is refused as
-   `grammar.malformed-line`, naming them all). One call is the whole
-   job: the server re-runs the query,
+   `balance_sheet`, `trial_balance`, `aged_receivables`,
+   `budget_variance` (§13), `us_tax_workpaper` (item 11) or
+   `performance_report` (qunei-nz-charities §5), and nothing else
+   (anything else is refused as `grammar.malformed-line`, naming them
+   all). One call is the whole job: the server re-runs the query,
    builds the statement table, applies the ledger's own template and
    brand kit, and hands back the document.
 2. The payload is `entity`, `report`, `title`, `period`, `source`,
    `template_version`, `brand`, `brand_version`, `html`. `html` is the
    document. `title` is what it prints ("Profit and loss", "Balance
-   sheet", "Trial balance", "Aged receivables", "Budget and actual").
-   `period` is what was actually drawn — `{ from, to }` for a P&L or a
-   budget comparison, `{ from, as_of }` for the
+   sheet", "Trial balance", "Aged receivables", "Budget and actual",
+   "US tax workpaper"). `period` is what was actually drawn:
+   `{ from, to }` for a P&L, a budget comparison or a tax workpaper (its
+   financial year), `{ from, as_of }` for the
    trial balance (which is drawn AT a date over a movement window, and
    prints both), and the as-of date alone for the balance sheet and the
    aging — so quote the window from here rather than from the parameters
@@ -384,8 +387,11 @@ it renders what the query tools return, this session, every time.
    - `aged_receivables` — `at` (defaults to today), `customer`.
    - `budget_variance` — `budget` (required), `from` and `to` (default
      to the budget's whole span), `book`, `view`, `as_at`.
+   - `us_tax_workpaper`: `at` (a year end; defaults to the most recent
+     year that has ended).
 
-   `codes` and `prepared_on` are accepted by all of them. So `customer` on
+   `prepared_on` is accepted by all of them, and `codes` by all but
+   `us_tax_workpaper`, which prints no account codes. So `customer` on
    a P&L, `compare` on a trial balance, or `view` on an aging comes back
    as `grammar.malformed-line` naming the parameter, rather than being
    quietly dropped while you believe it took effect. Missing required
@@ -397,7 +403,7 @@ it renders what the query tools return, this session, every time.
    to TRUE for `trial_balance` — a working paper is read against the
    chart — and to false for the others; pass it either way to
    override. The aging has no code column at all, so `codes` changes
-   nothing there.
+   nothing there, and the tax workpaper refuses it.
 7. `compare` is §5's parameter unchanged: `"prior-period"` or
    `"prior-year"`, on `profit_and_loss` and `balance_sheet` only. The
    document then grows three columns — the comparative figure, the
@@ -421,6 +427,18 @@ it renders what the query tools return, this session, every time.
     conversation, the document is what the human sends to a bank or an
     accountant. Each call queries the books itself, so a document is
     never assembled out of a table you already printed.
+11. `us_tax_workpaper` renders a US year's tax workpaper, the one the
+    preparer is given (qunei-us-tax §3.6). `at` is one of the ledger's
+    year ends up to the year in progress. A pinned year prints the
+    pinned figures and the method it was pinned under, its cover saying
+    when it was pinned; a year with no pin prints from the books as they
+    stand, its cover saying Draft. Every page ends "Prepared from the
+    books for the preparer. Not a filed return." Deliver it as written,
+    and say which it is when you hand it over. To show the figures in
+    chat, use the lines `us_tax_workpaper` returns, never
+    `profit_and_loss` regrouped by hand: the map, the method and the
+    adjustments live in the workpaper. A ledger that never ran
+    `configure_us_tax` is refused `us.not-configured`.
 
 ## 9. Restyling: a template edit, never a per-render option
 
@@ -486,7 +504,8 @@ it renders what the query tools return, this session, every time.
    silently, forever:
    - Table: `statement`, plus one of `statement-profit_and_loss`,
      `statement-balance_sheet`, `statement-trial_balance`,
-     `statement-aged_receivables`, `statement-budget_variance`.
+     `statement-aged_receivables`, `statement-budget_variance`,
+     `statement-performance_report`, `statement-us_tax_workpaper`.
    - Row groups: `section` (one per statement section) and
      `customer-group` (one per customer and currency on the aging).
    - Rows: `section-title`, `line`, `line-computed` (a derived line —

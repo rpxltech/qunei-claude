@@ -128,6 +128,9 @@ as many times, in as many formats, as anyone asks.
    declared fraction as a percentage, so a code named `gst-standard`
    prints "GST 15%" and `vat-reduced` at 0.125 prints "VAT 12.5%". When
    you declare a tax code, put the tax's name before the first hyphen.
+   The one exception: a US sales tax code is named `sales-tax` or
+   `sales-tax-<place>`, and `sales-tax-ny` at 8.875% prints
+   "Sales tax 8.875%".
 
 ## 4. Restyling: a template edit, never a per-render option
 

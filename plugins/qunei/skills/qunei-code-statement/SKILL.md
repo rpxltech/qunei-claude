@@ -71,6 +71,37 @@ in effect — read that first if you haven't.
 4. See qunei-nz-gst for why this split matters and the full warning
    list a mis-coded line trips at return time.
 
+## 4b. US businesses: sales tax, draws and meals
+
+1. On a US ledger (qunei-bookkeeping §8b) a purchase line stages at its
+   gross amount, sales tax included, to its expense account: no split,
+   no tag, and §4's tax fractions do not apply to it.
+2. A receipt that includes sales tax always splits, as qunei-bookkeeping
+   §8b.2 says: the tax is gross × rate ÷ (1 + rate), rounded to the cent,
+   to the sales tax liability account with no tag, and the rest to
+   income. Only the `tax:` tag needs a declared code: where the ledger
+   declares the code for the sale's place (qunei-us-tax §2), the income
+   line is tagged `tax:<code>` and the tax goes to that code's liability
+   account; where it declares none, the split stands all the same,
+   untagged, to `Liabilities:Sales-Tax-Payable`, at the rate the human
+   gives. A 217.75 deposit at 8.875% stages as −200.00 to income (tagged
+   `tax:sales-tax-ny` where that code is declared), −17.75 to
+   `Liabilities:Sales-Tax-Payable` (no tag) and the bank leg at +217.75.
+   When the statement does not say whether a deposit includes sales tax,
+   or at what rate, ask: never guess a split. A receipt that matches an
+   open invoice is coded to receivables as §3 says and never split again,
+   since the invoice split its tax when it was issued.
+3. A payment of collected sales tax to the state goes straight to the
+   liability account, untagged: it settles what was collected, so it is
+   no expense.
+4. A transfer to the owner, a personal withdrawal or the owner's own pay
+   is an owner draw: it goes to the owner's draws account
+   (`Equity:Owner-Draws` on `us-sole-prop`), never to an expense account.
+   A line that looks personal is the human's to place, so it goes on the
+   review list (§5) until they say.
+5. Meals and entertainment go to separate accounts (qunei-us-tax §1.7).
+   When a line could be either, ask rather than choose.
+
 ## 5. Unknowns are never guessed into an expense account
 
 1. A transaction with no confident convention or account match goes on
@@ -195,6 +226,6 @@ See qunei-bookkeeping for the session rules this skill builds on,
 qunei-conventions for how the payee rules it consults and writes are
 maintained, qunei-invoicing for what a tagged invoice receipt (§3)
 settles on the other side, qunei-nz-gst for the net + GST split
-convention applied in §4, qunei-bank-feeds for the connect/map/sync
-loop that feeds §9, and qunei-intake for the inbox triage loop that
-feeds §11.
+convention applied in §4, qunei-us-tax for the US rules of §4b and the
+workpaper they feed, qunei-bank-feeds for the connect/map/sync loop that
+feeds §9, and qunei-intake for the inbox triage loop that feeds §11.

@@ -57,8 +57,8 @@ Ask through all of these before calling anything:
 1. **Entity kind**: company, sole trader, or other.
 2. **Country, currency and year end**: the country decides the
    template, and a country template brings that country's currency,
-   financial year end, date style, starter chart of accounts and tax
-   codes:
+   financial year end, date style and starter chart of accounts, and its
+   tax codes everywhere but the United States:
    - New Zealand: `nz-company` (NZD, 31 March, `en-NZ`; GST codes
      `gst-standard` at 15%, `gst-zero`, `gst-exempt`).
    - A New Zealand charity or incorporated society: `nz-charity` (as
@@ -71,9 +71,20 @@ Ask through all of these before calling anything:
      `vat-standard` at 20%, `vat-reduced` at 5%, `vat-zero`,
      `vat-exempt`; rent carries no default code, since commercial rent
      is exempt unless the landlord has opted to tax).
-   - United States: `us-company` (USD, 31 December, `en-US`; no tax
-     codes, since sales tax varies by state: it posts straight to
-     `Liabilities:Sales-Tax-Payable`).
+   - United States, a sole proprietor or a single-member LLC taxed as a
+     sole proprietorship (the default for one): `us-sole-prop` (USD, 31
+     December, `en-US`; a Schedule C chart with every account already
+     mapped to its line of the form, and the cash method set; no tax
+     codes, since sales tax varies by place). Schedule C needs a ledger
+     kept in USD and a year ending 31 December: every US tax tool refuses
+     a `us-sole-prop` ledger created with another currency or year end,
+     so confirm both before creating it (§6). qunei-us-tax takes it from
+     there.
+   - United States, any other business: `us-company` (USD, 31 December,
+     `en-US`; no tax codes, since sales tax varies by state: it posts
+     straight to `Liabilities:Sales-Tax-Payable`). The workpapers for an
+     S corporation, partnership or C corporation are not prepared
+     (qunei-us-tax §8).
    - Anywhere else: `global`, a minimal chart with no tax codes and one
      `base` book, which needs the ledger's own currency, year end and
      locale (§4.1). For the locale, pick the date order the business
@@ -85,10 +96,10 @@ Ask through all of these before calling anything:
    builds a single `tax` book on the `base` layer.
 3. **Bank accounts**: every bank account to add, by name/purpose (e.g.
    "ANZ everyday checking", "savings"). Note that every template already
-   seeds one generic `Assets:Bank` (code 100) — ask whether that covers
-   the first account or whether it should be renamed in spirit (a new,
-   more specific account added instead; `add_account` cannot rename the
-   seeded one).
+   seeds one generic `Assets:Bank` (code 100, or 1000 on `us-sole-prop`).
+   Ask whether that covers the first account or whether it should be
+   renamed in spirit (a new, more specific account added instead;
+   `add_account` cannot rename the seeded one).
 4. **Usual suppliers/payees**: 5–10 names the entity deals with
    regularly, and which account category each maps to (e.g. "AWS →
    Expenses:General", "main landlord → Expenses:Rent").
@@ -115,12 +126,21 @@ Ask through all of these before calling anything:
      with GST split to Liabilities:GST and the net line tagged tax:gst`,
      or `Not registered for VAT: record amounts gross, with no tax
      tags`.
+   - United States: there is no registration to record. Ask the two
+     things the tax pack needs: the accounting method the business uses
+     for its taxes, `cash` or `accrual` (`us-sole-prop` starts on `cash`:
+     confirm it, never assume it), and whether it collects sales tax, in
+     which places and at what combined rate for each. Each place becomes
+     a code `sales-tax-<place>`, declared with `configure_us_tax`'s
+     `sales_tax` once the setup below is confirmed and done. The rest of
+     that conversation belongs to qunei-us-tax, not here.
 
 ## 3. Confirm the plan before executing anything
 
 1. Restate back to the human: entity kind, chosen template, currency,
    financial year end, the slug you'll use, every account you're about
-   to add, and every payee rule you're about to seed.
+   to add, and every payee rule you're about to seed (for a US business,
+   also its accounting method and each sales tax code with its rate).
 2. Get an explicit go-ahead. Do not call `init_entity` or any tool that
    follows until the human has confirmed the plan as stated.
 
@@ -139,7 +159,13 @@ Ask through all of these before calling anything:
    never for account name or code, which this tool can't change anyway.
 4. `append_convention` once per payee rule learned in the interview
    (one call per rule, per qunei-conventions).
-5. Finish with `get_briefing` and a plain-language summary of what now
+5. For a US business whose answers in §2.6 call for it,
+   `configure_us_tax` with exactly what the human confirmed: `method`
+   where it is not the template's `cash`, and `sales_tax` for each code,
+   as `[{"code": "sales-tax-ny", "rate": "0.08875"}]` (the rate a decimal
+   string). A ledger made from `us-company` has no form or method yet, so
+   its first call needs `form` and `method` together (qunei-us-tax §1.2).
+6. Finish with `get_briefing` and a plain-language summary of what now
    exists: the ledger, its accounts, and the conventions you seeded.
 
 ## 5. Never invent beyond the interview
@@ -281,5 +307,7 @@ human actually has the files.
 See qunei-bookkeeping for session discipline once the ledger exists,
 qunei-conventions for adding more payee rules after this session ends,
 qunei-invoicing for the configure_invoicing conversation when the human
-said yes to invoicing above, and qunei-nz-gst for the configure_nz_gst
-conversation when the human said yes to GST registration above.
+said yes to invoicing above, qunei-nz-gst for the configure_nz_gst
+conversation when the human said yes to GST registration above, and
+qunei-us-tax for a US business's method, sales tax codes and year-end
+workpaper.
