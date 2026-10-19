@@ -144,9 +144,10 @@ bookkeeper would.
    with no line to the liability account.
 4. Owner draws go to the owner's draws account, an equity account mapped
    `distributions` (`Equity:Owner-Draws` on `us-sole-prop`), never to an
-   expense account; an owner's own pay and income tax are draws too. On
-   another US ledger, propose the account with `add_account` and wait
-   for the human's yes (§2).
+   expense account; on `us-sole-prop`, an owner's own pay and income tax
+   are draws too. On another US ledger, propose the account with
+   `add_account` and wait for the human's yes (§2), and ask about an
+   owner's own pay, which may be wages or a guaranteed payment.
 5. Meals are kept apart from entertainment, each in its own account
    (qunei-us-tax §1.7). Ask when a receipt could be either.
 6. Personal spending never goes to an expense account. When a purchase
@@ -155,6 +156,17 @@ bookkeeper would.
 7. Expense claims (§13) post their whole amount on a USD ledger:
    `configure_expense_claims` refuses `split_tax: true` there, and a
    claim never asks about NZ GST.
+8. On `us-sole-prop` (a sole proprietor, or a single-member LLC taxed as
+   one), the owner's own contributions to a SEP, SIMPLE or solo 401(k)
+   plan, or any plan that covers the owner, and own health insurance are
+   draws too (item 4), never `Expenses:Retirement-Plans` or
+   `Expenses:Employee-Benefits`, which are for employees (qunei-us-tax
+   §1.8). On another US ledger how they are treated depends on the
+   return, so ask.
+9. On `us-sole-prop`, a vehicle lease payment goes to
+   `Expenses:Rent-Equipment`, never `Expenses:Car-Truck`: on actual
+   expenses it is line 20a, and with the standard mileage rate it comes
+   out at year end, by an adjustment (qunei-us-tax §1.8).
 
 ## 9. End of session: leave open items
 

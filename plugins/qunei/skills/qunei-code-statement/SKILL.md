@@ -94,13 +94,26 @@ in effect — read that first if you haven't.
 3. A payment of collected sales tax to the state goes straight to the
    liability account, untagged: it settles what was collected, so it is
    no expense.
-4. A transfer to the owner, a personal withdrawal or the owner's own pay
-   is an owner draw: it goes to the owner's draws account
-   (`Equity:Owner-Draws` on `us-sole-prop`), never to an expense account.
-   A line that looks personal is the human's to place, so it goes on the
-   review list (§5) until they say.
+4. A transfer to the owner or a personal withdrawal is an owner draw: it
+   goes to the owner's draws account (`Equity:Owner-Draws` on
+   `us-sole-prop`), never to an expense account. On `us-sole-prop` the
+   owner's own pay is an owner draw too; on another US ledger it may be
+   wages or a guaranteed payment, so ask. A line that looks personal is
+   the human's to place, so it goes on the review list (§5) until they
+   say.
 5. Meals and entertainment go to separate accounts (qunei-us-tax §1.7).
    When a line could be either, ask rather than choose.
+6. On `us-sole-prop` (a sole proprietor, or a single-member LLC taxed as
+   one), the owner's own contributions to a SEP, SIMPLE or solo 401(k)
+   plan, or any plan that covers the owner, and own health insurance are
+   owner draws (item 4), never `Expenses:Retirement-Plans` or
+   `Expenses:Employee-Benefits`, which are for employees; when a line
+   could be either, ask (§5). On another US ledger how they are treated
+   depends on the return, so ask.
+7. On `us-sole-prop`, a vehicle lease payment goes to
+   `Expenses:Rent-Equipment`, not `Expenses:Car-Truck`: on actual
+   expenses it is line 20a, and with the standard mileage rate it comes
+   out at year end, by an adjustment (qunei-us-tax §1.8).
 
 ## 5. Unknowns are never guessed into an expense account
 

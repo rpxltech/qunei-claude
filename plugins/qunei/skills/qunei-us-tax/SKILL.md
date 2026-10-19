@@ -40,7 +40,7 @@ return: Qunei files nothing (§8). Say so whenever you hand one over.
    catalog so far: another form can be configured, but its workpaper is
    refused with `us.catalog-unavailable` until its catalog ships. The
    pack needs a ledger kept in USD (`us.currency-unsupported`) and, for
-   Schedule C, a financial year ending 31 December
+   Schedule C, a financial year ending December 31
    (`us.year-end-unsupported`). Every tool in the pack refuses a ledger
    that is not, whatever year is asked, and the briefing's `problem` says
    why; `configure_us_tax` refuses every Schedule C call on it too, sales
@@ -70,6 +70,10 @@ return: Qunei files nothing (§8). Say so whenever you hand one over.
    on, and the pack never infers a treatment. An account left unmapped
    still counts, on the default key for its report section, and is named
    in an `unmapped-account` finding once it has postings in the year.
+   When the books keep an allowance for doubtful or bad debts, map that
+   account to `bad-debt-allowance`: the template ships none, and
+   `unmapped-account` covers income and expense accounts only, so
+   no finding asks.
 7. Meals take a deductible fraction: `{"key": "meals", "deductible":
    "0.50"}` deducts half of the account and leaves the rest
    nondeductible. The fraction is a decimal string strictly between 0
@@ -77,6 +81,55 @@ return: Qunei files nothing (§8). Say so whenever you hand one over.
    without one is deducted in full and raises `meals-fraction`. Keep
    entertainment in its own account, mapped `nondeductible`: a fraction
    applies to a whole account, so the two must never share one.
+8. Where the IRS sets a condition that an account's name does not show,
+   code by the condition:
+   - **Interest.** Interest charged to customers on overdue invoices or
+     notes is business income: map it to `other-income` (line 6). Bank
+     and working-capital interest stays `interest-income`, on the
+     owner's Schedule B.
+   - **Rents.** Real property rented without significant services is
+     `rental-income`, on Schedule E. Rent with significant services
+     (maid-type), or personal property rented as a business, is
+     `gross-receipts` (line 1).
+   - **Royalties.** A self-employed writer's, inventor's or artist's
+     royalties are `gross-receipts` (line 1). Other royalties are
+     `royalty-income`, on Schedule E.
+   - **Mortgage interest.** Without a Form 1098, for example when
+     seller-financed, book it to `Expenses:Interest-Other` (line 16b), an
+     account the template already has.
+   - **The owner's own retirement contributions and health insurance.**
+     The owner's own contributions to a SEP, SIMPLE or solo 401(k) plan,
+     or any plan that covers the owner, and the owner's own health
+     insurance, are not Schedule C expenses: they go on Schedule 1, lines
+     16 and 17. Book them as owner draws (`Equity:Owner-Draws`) and tell
+     the preparer. `Expenses:Retirement-Plans` and
+     `Expenses:Employee-Benefits` are for employees only.
+   - **Penalties.** Fines paid to a government are nondeductible
+     (`Expenses:Penalties`). Penalties for late performance or
+     nonperformance of a contract are deductible, but the template ships
+     no account for them: add one with the human's yes (qunei-bookkeeping
+     §2), for example `Expenses:Contract-Penalties`, and map it to
+     `other-deductions`.
+   - **Vehicles.** What is deducted where depends on the method for the
+     vehicle.
+     - **On actual expenses:** lease payments go on line 20a
+       (`Expenses:Rent-Equipment`) and vehicle depreciation on line 13
+       (`Expenses:Depreciation`), not in `Expenses:Car-Truck`. For a
+       vehicle also used personally, only the business share is
+       deductible (the human or their preparer gives the amount, taken
+       out by a negative adjustment with a memo), and the preparer
+       handles any lease inclusion amount.
+     - **With the standard mileage rate:** the vehicle's lease payments
+       and depreciation come out, through a negative `rent-equipment`
+       adjustment and a negative `depreciation` adjustment for those
+       amounts alone, each with a memo. The `car-truck` adjustment brings
+       line 9 to the mileage amount, plus parking fees and tolls:
+       business parking and tolls are booked to `Expenses:Car-Truck`, so
+       it is the difference from what that account holds.
+   - **Amortization.** It belongs in Part V: map it to
+     `other-deductions`, and never to `depreciation`.
+   - **Home-use costs.** Never code them to Part II accounts. The home
+     office is a `home-office` adjustment (line 30).
 
 ## 2. Sales tax codes
 
@@ -121,13 +174,20 @@ return: Qunei files nothing (§8). Say so whenever you hand one over.
      mapped `distributions` and re-code what was posted with
      `amend_entry`), `inventory-unchanged` (cost of goods sold with no
      inventory moving: the year-end count is probably missing, so ask for
-     it) and the cash method's three (§5.4).
+     it), the cash method's three (§5.4) and the accrual method's one,
+     `bad-debt-reserve` (§5.6).
    - To state, with nothing to fix: `owners-return` (amounts that belong
      on the owner's own return, such as interest, dividends, rents and
      charitable gifts, listed for their preparer), `not-prepared`
      (amounts needing a form the pack does not prepare, such as a gain on
-     a sale, left off and named for the preparer) and `catalog-provisional`
-     (§6).
+     a sale, left off and named for the preparer) and
+     `catalog-provisional` (§6). `net-loss` says line 31 is a loss.
+     Before it is entered there, the preparer applies the at-risk rules
+     (line 32, Form 6198) and the passive activity loss rules (Form
+     8582); the excess business loss limit (Form 461) applies after it,
+     on Schedule 1, line 8p. The pack applies none of them, so tell the
+     preparer. On the year in progress it is a loss so far, and it
+     matters once the year has ended.
    Re-code every genuine mistake with `amend_entry` (qunei-bookkeeping
    §3) and preview again until the list is empty or fully explained.
 3. **Finish the map.** `configure_us_tax` with `map` (and `unmap`) for
@@ -137,7 +197,9 @@ return: Qunei files nothing (§8). Say so whenever you hand one over.
 4. **Adjust, with memos.** An adjustment carries what the books do not
    hold, each `{key, amount, memo}`: a home office (`home-office`, line
    30), the standard mileage rate in place of actual car costs
-   (`car-truck`, the difference), tax depreciation in place of book
+   (`car-truck`, the difference, with the vehicle's lease payments and
+   depreciation taken out by negative `rent-equipment` and
+   `depreciation` adjustments, §1.8), tax depreciation in place of book
    depreciation (`depreciation`, the difference), or a cash method
    correction (§5.4).
    - `amount` is a decimal string with at most two places, such as
@@ -252,11 +314,16 @@ return: Qunei files nothing (§8). Say so whenever you hand one over.
      mapped `bad-debts`, or to one mapped `bad-debt-allowance` when the
      receivable is written off against an allowance) is not deductible,
      because the income it would reverse was never counted. A write-off
-     settles nothing by itself,
-     and one in the same entry as a short payment counts only the cash
-     that came in. Adjust the deduction out with a negative `bad-debts`
-     adjustment and a memo, or leave it for the preparer: the human
-     decides.
+     settles nothing by itself, and one in the same entry as a short
+     payment counts only the cash that came in. Adjust out only the bad
+     debts expense, the postings to the account mapped `bad-debts`, with
+     a negative `bad-debts` adjustment and a memo, or leave it for the
+     preparer: the human decides. An entry that only moves an allowance
+     deducts nothing and needs no adjustment. On books with an allowance
+     one bad debt is two named entries: the provision (Dr Bad-Debts, Cr
+     Allowance) is the deduction, and the write-off against the
+     allowance (Dr Allowance, Cr Receivable) is not: adjusting out both
+     removes the deduction twice.
    - `cash-accrual`: an expense posted to accounts payable is deductible
      when it is paid, and the books cannot say when that was without
      bills. Check the year each was paid and adjust it into that year, or
@@ -268,6 +335,23 @@ return: Qunei files nothing (§8). Say so whenever you hand one over.
      `cash-accrual` never fires.
 5. Never switch the method to clear a finding: it is for the human and
    their preparer. A pinned year keeps the method it was pinned under.
+6. The accrual method adds one finding, naming its entries:
+   - `bad-debt-reserve`: the books keep an allowance for bad debts (the
+     year has postings to an account mapped `bad-debt-allowance`). The
+     bad debts expense, provisions to the allowance included, reaches
+     line 27b as it stands, but for tax a bad debt is deducted when a
+     specific debt is written off, not when an allowance is provided for,
+     so the deduction is the year's write-offs. The named entries are the
+     provisions (Dr Bad-Debts, Cr Allowance) and the write-offs against
+     the allowance (Dr Allowance, Cr Receivable); a debt written off
+     straight to the expense needs nothing. Ask the human, or their
+     preparer, for the debts actually written off in the year, and adjust
+     `bad-debts` by the difference between that and the bad debts
+     expense, with a memo: 1000.00 provided and 400.00 written off is an
+     adjustment of `"-600.00"`. The figure is theirs, never yours (§3.4),
+     and they may leave it for the preparer: the human decides. A cash
+     year never raises it: `cash-bad-debt` covers a cash year's bad debts
+     (§5.4).
 
 ## 6. A year whose own forms are not final
 
@@ -286,7 +370,7 @@ return: Qunei files nothing (§8). Say so whenever you hand one over.
    than the pack's first catalog has none at all, and is refused the same
    way on the preview too.
 3. The briefing lists such a year anyway. From January 2027, for
-   example, the year ending 31 December 2026 has ended and is on the
+   example, the year ending December 31, 2026 has ended and is on the
    briefing's `unpinned`, yet `pin_us_tax_workpaper` refuses it as
    provisional until its own catalog ships; so does every later ended
    year, each until its own. Say so: the year is waiting on the forms,
@@ -297,14 +381,14 @@ return: Qunei files nothing (§8). Say so whenever you hand one over.
 
 ## 7. Due dates
 
-1. Schedule C is due 15 April after the calendar year, with the owner's
-   Form 1040: 15 April 2027 for the year ending 31 December 2026. A
+1. Schedule C is due April 15 after the calendar year, with the owner's
+   Form 1040: April 15, 2027 for the year ending December 31, 2026. A
    workpaper carries it as `year.due`, and the briefing's `next_due` is
    the earliest unpinned year's, even when it has passed: an overdue year
    is the most important fact the briefing carries.
 2. Not modelled: a due date that lands on a weekend or a legal holiday
    is never moved to the next business day, and an extension (Form 4868)
-   is never applied. Every date this pack reports is the plain 15 April,
+   is never applied. Every date this pack reports is the plain April 15,
    which is never later than the real deadline. Confirm the actual date
    with the preparer when one looks borderline.
 

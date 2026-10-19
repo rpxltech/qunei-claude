@@ -150,18 +150,21 @@ stages, or approves anything.
    per code: the same catalogue qunei-us-tax explains in full. This
    skill only surfaces them: it never re-maps, adjusts or pins anything.
    `catalog-provisional` is expected while the year's own forms are not
-   final: say so once, not as a defect. The pack carries a catalog for
-   Schedule C only, so on a ledger configured for Form 1120-S, 1065 or
-   1120 the preview refuses `us.catalog-unavailable`: say that once, as a
-   fact, with no findings to report.
+   final: say so once, not as a defect. `net-loss` on the year in
+   progress is a loss so far: say so, and that it matters once the year
+   has ended. The pack carries a catalog for Schedule C only, so on a
+   ledger configured for Form 1120-S, 1065 or 1120 the preview refuses
+   `us.catalog-unavailable`: say that once, as a fact, with no findings
+   to report.
 3. Add the briefing's own calendar facts: `us_tax.unpinned` (ended years
    still to pin, one of which may be refused as provisional until its
    forms ship, qunei-us-tax §6) and `us_tax.next_due`, where an overdue
    date is the one that matters most, and its `problem` when it carries
    one.
 4. Fold the results into §6's write-up: an unmapped account, a meals
-   account without its fraction and a cash method finding are exactly
-   the kind of finding `append_open_item` exists for.
+   account without its fraction and a method finding (a cash method one,
+   or `bad-debt-reserve` on the accrual method) are exactly the kind of
+   finding `append_open_item` exists for.
 
 ## 6. Write findings, don't act on them
 

@@ -72,15 +72,15 @@ Ask through all of these before calling anything:
      `vat-exempt`; rent carries no default code, since commercial rent
      is exempt unless the landlord has opted to tax).
    - United States, a sole proprietor or a single-member LLC taxed as a
-     sole proprietorship (the default for one): `us-sole-prop` (USD, 31
-     December, `en-US`; a Schedule C chart with every account already
+     sole proprietorship (the default for one): `us-sole-prop` (USD,
+     December 31, `en-US`; a Schedule C chart with every account already
      mapped to its line of the form, and the cash method set; no tax
      codes, since sales tax varies by place). Schedule C needs a ledger
-     kept in USD and a year ending 31 December: every US tax tool refuses
+     kept in USD and a year ending December 31: every US tax tool refuses
      a `us-sole-prop` ledger created with another currency or year end,
      so confirm both before creating it (§6). qunei-us-tax takes it from
      there.
-   - United States, any other business: `us-company` (USD, 31 December,
+   - United States, any other business: `us-company` (USD, December 31,
      `en-US`; no tax codes, since sales tax varies by state: it posts
      straight to `Liabilities:Sales-Tax-Payable`). The workpapers for an
      S corporation, partnership or C corporation are not prepared
