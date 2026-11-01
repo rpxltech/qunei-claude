@@ -94,7 +94,8 @@ stage it at all.
    second way, through the Akahu feed. Before staging any line from a
    statement, check for that other copy: call `find_entries` with the
    line's date and its absolute amount, and call `get_feed_items` and
-   scan its uncoded items for one at that same date and amount.
+   scan its uncoded items for one at that same date and amount. Scan
+   every batch: while `next_after` is not null, pass it back as `after`.
 2. Neither turns up a match: stage the line normally, in §6.
 3. `find_entries` turns up a match — an entry already posted or
    drafted: it's already handled, from whichever channel got there

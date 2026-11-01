@@ -65,7 +65,12 @@ Connect button.
    page. If every connection is rejected the call refuses
    `feed.token-rejected` naming the page.
 5. `get_feed_items` lists uncoded items, oldest first, each resolved to its
-   `ledger_account` and carrying the bank's enrichment where present.
+   `ledger_account` and carrying the bank's enrichment where present. It
+   answers in batches (`limit`, at most 200). While `next_after` is not
+   null, more uncoded items follow: pass it back as `after` for the next
+   batch. An item stays uncoded until its entry is posted or approved, so
+   items with staged drafts keep appearing; page on with `after` rather
+   than staging them again.
 6. Code every item exactly as qunei-code-statement codes any other
    transaction.
 

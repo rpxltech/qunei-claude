@@ -181,8 +181,9 @@ in effect — read that first if you haven't.
 ## 9. Feed items as an input source
 
 1. A bank-feed item batch (qunei-bank-feeds) replaces §1-2 above, not the
-   rest of this skill: pull uncoded items with `get_feed_items` instead of
-   reading a pasted PDF/CSV, then apply §3 onward exactly as written — match
+   rest of this skill: pull uncoded items with `get_feed_items`, batch by
+   batch as qunei-bank-feeds §3 describes, instead of reading a pasted
+   PDF/CSV, then apply §3 onward exactly as written — match
    payees, split GST, stage, review, and give every held-back item a
    disposition, all unchanged.
 2. Each item already carries its target `ledger_account` (resolved by

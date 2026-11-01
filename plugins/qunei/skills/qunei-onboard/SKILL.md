@@ -14,12 +14,13 @@ then execute it exactly as confirmed.
 ## 1. Where you are: the hosted arrival
 
 1. Qunei is hosted and self-serve. The human signed up at qunei.ai,
-   verified their email, and brought you in one of three ways: the
+   verified their email, and brought you in one of four ways: the
    Qunei plugin (Claude on a paid plan, or Claude Code), which
    carries these skills and the connection; Qunei added as a custom
    connector on Claude's free plan, with its skills uploaded by hand;
-   or, for tools that cannot sign in, an MCP config carrying a personal
-   access token. By the time this skill runs, the connection already
+   Qunei added to ChatGPT, which signs in the same way; or, for tools
+   that cannot sign in, an MCP config carrying a personal access
+   token. By the time this skill runs, the connection already
    exists, and there is no web setup wizard to send them to. You are
    the setup — the product calls you the workspace's scribe: you record
    it, the human reviews it. With the plugin, its `start` skill runs the
@@ -49,6 +50,12 @@ then execute it exactly as confirmed.
    chosen as Full access on the workspace page or /app/connect, or Full
    access on the consent screen when they sign you in. Continue once
    they have.
+5. In ChatGPT, say this once the ledger is set up: ChatGPT does not ask
+   them before you change the books, so for books that matter Qunei's
+   guide recommends draft-only. They disconnect ChatGPT under Connected
+   assistants on their workspace page, then connect it again choosing
+   Draft-only, and from then on approve your drafts on Qunei's drafts
+   page.
 
 ## 2. Interview first — no tools yet
 
@@ -246,11 +253,12 @@ Ask through all of these before calling anything:
 ## 9. Archiving a ledger
 
 1. `archive_entity` archives a ledger; `restore: true` un-archives it.
-   Archiving is how the bill goes down — billing counts unarchived
-   ledgers, so the next invoice drops — while the books stay readable:
-   the ledger's files are never touched, and everyone with access can
-   still read it forever by naming its slug explicitly. It disappears
-   from ledger lists and refuses writes; nothing is ever deleted.
+   Archiving is how the bill goes down: billing counts ledgers that are
+   unarchived and not mid-move, so the next invoice drops. The books stay
+   readable all the same: the ledger's files are never touched, and
+   everyone with access can still read it forever by naming its slug
+   explicitly. It disappears from ledger lists and refuses writes;
+   nothing is ever deleted.
 2. Billing-owner-only, and `entity:` is REQUIRED — this tool never
    falls back to a default ledger. Confirm the slug with the human and
    restate the consequences (writes stop, bill drops, reads survive)
@@ -286,8 +294,9 @@ Ask through all of these before calling anything:
    needs no sign-in, so treat it like a password. The Download link on
    their workspace page gives the same zip.
 5. Connection facts worth relaying when they come up: completing a
-   password reset disconnects claude.ai/Cowork connections (the human
-   must reconnect and re-consent there), while agent personal access
+   password reset disconnects every assistant connected by signing in,
+   claude.ai, Cowork and ChatGPT alike (the human must reconnect and
+   re-consent there), while agent personal access
    tokens keep working. The workspace page lists the assistants
    connected by signing in and disconnects any one of them without a
    reset. A personal access token can be given an end date when it is
