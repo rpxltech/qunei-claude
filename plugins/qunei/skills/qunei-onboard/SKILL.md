@@ -226,7 +226,8 @@ Ask through all of these before calling anything:
 
 ## 8. Inviting users
 
-1. `invite_user` invites a person to the workspace by email. Grants and
+1. `invite_user` asks to invite a person to the workspace by email, and
+   the billing owner sends it (item 4). Grants and
    roles are named at invite time: `grants` is one `{entity, role}`
    object per ledger they should reach — one of three roles: `viewer`
    (read everything, write nothing), `member` (full bookkeeping) or
@@ -239,11 +240,15 @@ Ask through all of these before calling anything:
    plainly and name the recovery: the billing owner sends the invite
    (this tool, or the web users page — same rules either way).
 3. Caps exist, and refusals name the cap that was hit: at most one
-   pending invite per address, plus pending and daily caps. The accept
-   link goes only to the invitee's inbox and expires in 7 days; your
-   response is the pending-invite summary and never carries the link —
-   don't promise the human a link to forward.
-4. Interview before inviting, §2's manners: which ledgers, which role
+   pending invite per address, plus pending and daily caps.
+4. An invite you ask for waits for the billing owner. Qunei emails
+   them, and the invitee gets nothing until they press Send invitation
+   on Qunei's Users page (`confirm_url` in your response). Tell the
+   human that, and never say the invite has gone out. Once sent, the
+   accept link goes only to the invitee's inbox and expires in 7 days;
+   your response never carries it, so don't promise the human a link to
+   forward.
+5. Interview before inviting, §2's manners: which ledgers, which role
    on each, confirmed back before the call. An accountant usually
    starts as `viewer`; upgrade to `member` when they actually keep the
    books. Staff and volunteers who only claim back what they spend get
