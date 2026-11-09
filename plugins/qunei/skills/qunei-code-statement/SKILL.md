@@ -14,12 +14,19 @@ in effect — read that first if you haven't.
 
 1. Call `get_briefing` (bookkeeping's session-start rule — do this once
    per session, not per statement) and `read_conventions` for the full,
-   untruncated payee-to-account rules. Do this before extracting a
-   single transaction, so every match below has the entity's real rules
-   to check against.
+   untruncated payee-to-account conventions. Do this before extracting a
+   single transaction, so every match below has the entity's real
+   conventions to check against.
 2. Also call `list_accounts` if you haven't already this session — you
    need real account names to propose, not ones inferred from the
    statement's own wording.
+
+Whenever you tell the human about conventions (proposing to save them,
+having saved them, or what happens next month), call them notes you will
+read before the next statement. Never say a statement, or next month's
+payees, will code itself or code automatically: the human still attaches
+each statement (or a connected New Zealand bank's transactions arrive on
+their own) and approves the drafts.
 
 ## 2. Extract transactions
 
@@ -159,9 +166,9 @@ in effect — read that first if you haven't.
 ## 8. After approval
 
 1. Call `approve_drafts` with the ids the human approved.
-2. For each payee the human confirmed a NEW stable rule for (one not
-   already in conventions.md), call `append_convention` — one call per
-   rule, per qunei-conventions.
+2. For each payee the human confirmed a NEW stable convention for (one
+   not already in conventions.md), call `append_convention` — one call
+   per convention, per qunei-conventions. Describe them as §1 says.
 3. For every UNKNOWN or question left unresolved, call
    `append_open_item` — qunei-bookkeeping's end-of-session rule, applied
    here to whatever this statement left open.
@@ -237,7 +244,7 @@ in effect — read that first if you haven't.
    whichever channel it arrived through.
 
 See qunei-bookkeeping for the session rules this skill builds on,
-qunei-conventions for how the payee rules it consults and writes are
+qunei-conventions for how the payee conventions it consults and writes are
 maintained, qunei-invoicing for what a tagged invoice receipt (§3)
 settles on the other side, qunei-nz-gst for the net + GST split
 convention applied in §4, qunei-us-tax for the US rules of §4b and the
