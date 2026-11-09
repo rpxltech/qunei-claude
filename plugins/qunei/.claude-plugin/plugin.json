@@ -1,8 +1,8 @@
 {
   "name": "qunei",
   "displayName": "Qunei",
-  "description": "Keep your books in Qunei from Claude: set up a ledger, code bank statements and see reports. Nothing posts until you approve it.",
-  "version": "2026.11.10",
+  "description": "Keep your books in Qunei from Claude: code bank statements into drafts you approve, email invoices to customers, track budgets and expense claims, and see reports.",
+  "version": "2026.11.10.2",
   "author": {
     "name": "Qunei",
     "url": "https://qunei.ai",
