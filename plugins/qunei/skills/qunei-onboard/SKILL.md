@@ -290,7 +290,12 @@ Ask through all of these before calling anything:
    forever — nobody is ever locked out of their own books. Creating a
    new ledger on a lapsed workspace refuses with
    `billing.create-blocked`, naming the same recovery. Point the billing
-   owner at the Portal; don't retry the write.
+   owner at the Portal; don't retry the write. The one exception is a
+   workspace whose trial ended before it had any ledger: the billing
+   owner can still create the first one, so there is something to
+   subscribe to. That success carries a `billing_note` saying the new
+   ledger is read-only until the workspace subscribes; relay it, and
+   point the billing owner at Subscribe on the dashboard's billing card.
 4. When the human wants a copy of their books, in any billing state,
    `export_entity` returns a ten-minute link to a zip of the whole
    ledger: the plain-text journal, every document with its history, and
